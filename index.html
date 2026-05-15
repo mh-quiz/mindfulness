@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which mindfulness character are you?</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #87c300;
+    --green-light: #f0f7e0;
+    --green-dark: #689157;
+    --blue: #17469e;
+    --warm: #c9a87c;
+    --warm-light: #f5efe6;
+    --warm-dark: #8a6a3e;
+    --stone: #9e9689;
+    --text: #2c2a25;
+    --text-muted: #7a766e;
+    --bg: #faf8f4;
+    --white: #ffffff;
+    --radius: 14px;
+    --radius-lg: 22px;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  /* Cover */
+  #screen-cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 3rem 1.5rem 2rem;
+    animation: fadeUp .6s ease both;
+  }
+
+  .cover-icon {
+    font-size: 3.2rem;
+    margin-bottom: 1.4rem;
+    display: block;
+    animation: floatIcon 4s ease-in-out infinite;
+  }
+
+  @keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .cover-title {
+    font-family: Arial, sans-serif;
+    font-size: clamp(1.7rem, 5vw, 2.4rem);
+    font-weight: bold;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+  }
+
+  .cover-title em {
+    font-style: italic;
+    color: var(--green-dark);
+  }
+
+  .cover-desc {
+    font-size: .95rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 420px;
+    margin-bottom: 2.2rem;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--green-dark);
+    color: var(--white);
+    font-family: Arial, sans-serif;
+    font-size: .9rem;
+    font-weight: bold;
+    letter-spacing: .03em;
+    padding: .85rem 2.4rem;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: background .2s, color .2s, transform .15s;
+    text-decoration: none;
+  }
+
+  .btn-primary:hover { background: var(--green); color: var(--text); transform: translateY(-1px); }
+  .btn-primary:active { transform: scale(.98); }
+
+  /* Progress */
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--green-light);
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width .4s ease;
+  }
+
+  /* Question screen */
+  #screen-quiz {
+    display: none;
+    animation: fadeUp .45s ease both;
+  }
+
+  .q-label {
+    font-size: .75rem;
+    font-weight: bold;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: .6rem;
+  }
+
+  .q-text {
+    font-family: Arial, sans-serif;
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    font-weight: bold;
+    line-height: 1.45;
+    color: var(--green-dark);
+    margin-bottom: 1.8rem;
+  }
+
+  .options-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+  }
+
+  .option-btn {
+    width: 100%;
+    text-align: left;
+    padding: 1rem 1.3rem;
+    background: var(--white);
+    border: 1px solid #e5e0d6;
+    border-radius: var(--radius);
+    font-family: Arial, sans-serif;
+    font-size: .93rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color .2s, background .2s, transform .12s;
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .option-btn:hover {
+    border-color: var(--green);
+    background: var(--green-light);
+    transform: translateX(4px);
+  }
+
+  .option-btn.selected {
+    border-color: var(--green-dark);
+    background: var(--green-light);
+    font-weight: bold;
+    color: var(--green-dark);
+  }
+
+  .option-btn.selected::after {
+    content: '✓';
+    position: absolute;
+    right: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--green-dark);
+    font-size: .9rem;
+  }
+
+  /* Navigation */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.8rem;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid #d5cfc4;
+    color: var(--text-muted);
+    font-family: Arial, sans-serif;
+    font-size: .88rem;
+    padding: .65rem 1.4rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+
+  .btn-ghost:hover { border-color: var(--stone); color: var(--text); }
+
+  .btn-next {
+    background: var(--green-dark);
+    color: var(--white);
+    font-family: Arial, sans-serif;
+    font-size: .88rem;
+    font-weight: bold;
+    padding: .65rem 1.8rem;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: background .2s, color .2s, opacity .2s, transform .15s;
+    opacity: .4;
+    pointer-events: none;
+  }
+
+  .btn-next.active { opacity: 1; pointer-events: auto; }
+  .btn-next.active:hover { background: var(--green); color: var(--text); transform: translateY(-1px); }
+
+  /* Result screen */
+  #screen-result {
+    display: none;
+    animation: fadeUp .5s ease both;
+  }
+
+  .result-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .result-icon {
+    font-size: 3.8rem;
+    display: block;
+    margin-bottom: 1rem;
+    animation: floatIcon 4s ease-in-out infinite;
+  }
+
+  .result-type-label {
+    font-size: .72rem;
+    font-weight: bold;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--warm-dark);
+    margin-bottom: .5rem;
+  }
+
+  .result-title {
+    font-family: Arial, sans-serif;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    font-weight: bold;
+    color: var(--green-dark);
+    margin-bottom: .5rem;
+  }
+
+  .result-card {
+    background: var(--white);
+    border: 1px solid #e5e0d6;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+
+  .result-band { height: 6px; }
+
+  .result-body { padding: 1.8rem 1.8rem 2rem; }
+
+  .result-traits-label {
+    font-size: .72rem;
+    font-weight: bold;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: .6rem;
+  }
+
+  .result-traits {
+    font-size: .97rem;
+    color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 1.6rem;
+  }
+
+  .reset-callout {
+    background: var(--warm-light);
+    border-left: 3px solid var(--warm);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1.1rem 1.3rem;
+  }
+
+  .reset-callout-label {
+    font-size: .72rem;
+    font-weight: bold;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--warm-dark);
+    margin-bottom: .5rem;
+  }
+
+  .reset-callout p {
+    font-size: .93rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .retake-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: transparent;
+    border: 1px solid #d5cfc4;
+    color: var(--text-muted);
+    font-family: Arial, sans-serif;
+    font-size: .88rem;
+    padding: .8rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+    margin-top: .5rem;
+  }
+
+  .retake-btn:hover { border-color: var(--stone); color: var(--text); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- COVER -->
+  <div id="screen-cover">
+    <span class="cover-icon">🌿</span>
+    <h1 class="cover-title">Which <em>mindfulness character</em> are you?</h1>
+    <p class="cover-desc">Answer five quick questions to discover how you respond to everyday stress, and the small habit that could help you feel more balanced.</p>
+    <button class="btn-primary" onclick="startQuiz()">Take the one-minute quiz</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <p class="q-label" id="q-label">Question 1 of 5</p>
+    <h2 class="q-text" id="q-text"></h2>
+    <ul class="options-list" id="options-list"></ul>
+    <div class="nav-row">
+      <button class="btn-ghost" id="btn-back" onclick="goBack()">← Back</button>
+      <button class="btn-next" id="btn-next" onclick="goNext()">Next →</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result">
+    <div class="result-header">
+      <span class="result-icon" id="result-icon"></span>
+      <p class="result-type-label">Your mindfulness character</p>
+      <h2 class="result-title" id="result-title"></h2>
+    </div>
+    <div class="result-card">
+      <div class="result-band" id="result-band"></div>
+      <div class="result-body">
+        <p class="result-traits-label">Your traits</p>
+        <p class="result-traits" id="result-traits"></p>
+        <div class="reset-callout">
+          <p class="reset-callout-label">🌱 Your mindful reset</p>
+          <p id="result-reset"></p>
+        </div>
+      </div>
+    </div>
+    <button class="retake-btn" onclick="retake()">↩ Retake the quiz</button>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    text: "When life gets busy, what usually happens first?",
+    options: [
+      "My thoughts start racing",
+      "I become irritable or impatient",
+      "I start worrying about everyone else",
+      "I feel physically tense or tired",
+      "I become quieter and keep things to myself"
+    ]
+  },
+  {
+    text: "How often do you struggle to switch off at the end of the day?",
+    options: [
+      "My mind keeps replaying the day",
+      "I often feel like there's still more to do",
+      "I'm still thinking about other people's needs",
+      "I feel restless and need movement and fresh air",
+      "I withdraw and prefer not to talk much"
+    ]
+  },
+  {
+    text: "When you feel overwhelmed, what do you usually do?",
+    options: [
+      "Analyse the situation over and over",
+      "Keep pushing through",
+      "Talk to someone or check in on others",
+      "Take a break, walk, or get outside",
+      "Keep to myself and process it alone"
+    ]
+  },
+  {
+    text: "How often do you feel mentally \"on\" even when you're resting?",
+    options: [
+      "My thoughts rarely slow down",
+      "I feel guilty when I'm not being productive",
+      "I'm often thinking about other people",
+      "I start craving movement, change, or stimulation",
+      "I may seem calm, but I'm processing a lot internally"
+    ]
+  },
+  {
+    text: "What helps you feel most grounded?",
+    options: [
+      "Writing things down or quiet reflection",
+      "Structure, planning, or ticking things off",
+      "Meaningful conversations",
+      "Nature, movement, or fresh air",
+      "Being with someone I trust, even in silence"
+    ]
+  }
+];
+
+const results = [
+  {
+    title: "The overthinker",
+    icon: "🌀",
+    bandColor: "#87c300",
+    traits: "You analyse everything, replay conversations, and your mind rarely switches off.",
+    reset: "Try a two-minute breathing pause or journaling. Writing your thoughts down helps \"empty\" your mind so you don't have to carry them all day."
+  },
+  {
+    title: "The achiever",
+    icon: "📋",
+    bandColor: "#c9a87c",
+    traits: "You keep going, even when your mind and body need a break.",
+    reset: "Schedule small pauses like you schedule meetings. Even a five-minute \"tech-free\" break between tasks can prevent physical and mental burnout."
+  },
+  {
+    title: "The caregiver",
+    icon: "🤲",
+    bandColor: "#d4a0a0",
+    traits: "You're always looking after others, but often forget your own needs.",
+    reset: "Give yourself permission to recharge. Remember that you cannot pour from an empty cup. Taking ten minutes for yourself is an act of care for your loved ones, too."
+  },
+  {
+    title: "The explorer",
+    icon: "🌿",
+    bandColor: "#689157",
+    traits: "You restore best through movement, creativity, and fresh perspective.",
+    reset: "Reconnect with nature or physical activity. When you feel stuck, a quick change of scenery or a short walk can shift your mood almost instantly."
+  },
+  {
+    title: "The quiet thinker",
+    icon: "🪟",
+    bandColor: "#17469e",
+    traits: "You may appear calm on the outside, but process stress internally and often carry more than people realise.",
+    reset: "Share what's on your mind with someone you trust. Externalising your thoughts through conversation or creative outlets helps stop internal pressure from building up."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+
+function show(id) {
+  ['screen-cover','screen-quiz','screen-result'].forEach(s => {
+    document.getElementById(s).style.display = 'none';
+  });
+  const el = document.getElementById(id);
+  el.style.display = 'flex';
+  el.style.flexDirection = 'column';
+  el.style.animation = 'none';
+  requestAnimationFrame(() => { el.style.animation = 'fadeUp .45s ease both'; });
+}
+
+function startQuiz() {
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  show('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('q-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (answers[current] === i ? ' selected' : '');
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i);
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+
+  const fill = (current / questions.length) * 100;
+  document.getElementById('progress-fill').style.width = fill + '%';
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = current === questions.length - 1 ? 'See my result →' : 'Next →';
+  nextBtn.classList.toggle('active', answers[current] !== null);
+
+  document.getElementById('btn-back').style.visibility = current === 0 ? 'hidden' : 'visible';
+}
+
+function selectAnswer(i) {
+  answers[current] = i;
+  document.querySelectorAll('.option-btn').forEach((b, idx) => {
+    b.classList.toggle('selected', idx === i);
+  });
+  document.getElementById('btn-next').classList.add('active');
+}
+
+function goNext() {
+  if (answers[current] === null) return;
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function goBack() {
+  if (current > 0) { current--; renderQuestion(); }
+}
+
+function showResult() {
+  const counts = [0,0,0,0,0];
+  answers.forEach(a => { if (a !== null) counts[a]++; });
+  const topIdx = counts.indexOf(Math.max(...counts));
+  const r = results[topIdx];
+
+  document.getElementById('result-icon').textContent = r.icon;
+  document.getElementById('result-title').textContent = r.title;
+  document.getElementById('result-traits').textContent = r.traits;
+  document.getElementById('result-reset').textContent = r.reset;
+  document.getElementById('result-band').style.background = r.bandColor;
+
+  document.getElementById('progress-fill').style.width = '100%';
+  show('screen-result');
+}
+
+function retake() {
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  show('screen-cover');
+}
+</script>
+</body>
+</html>
